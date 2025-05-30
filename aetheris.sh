@@ -44,8 +44,8 @@ load_english_lang() {
     LANG_WARNING["ethical"]="[!] WARNING: Unauthorized scanning may be illegal. Use responsibly."
     LANG_MENU_TITLE=":: AETHERIS ▸ Reconnaissance. Elegantly Executed ::"
     LANG_MENU_OPTIONS=(
-        "Full reconnaissance (top 1000 ports, OS & service detection)" # Emojis REMOVED from definition
-        "Exhaustive scan (all 65535 ports, OS & service detection)"    # Emojis REMOVED from definition
+        "Full reconnaissance (top 1000 ports, OS & service detection)"
+        "Exhaustive scan (all 65535 ports, OS & service detection)"
         "Local subnet host discovery"
         "SMB enumeration"
         "HTTP vulnerability scan (basic scripts)"
@@ -124,8 +124,8 @@ load_spanish_lang() {
     LANG_WARNING["ethical"]="[!] ADVERTENCIA: El escaneo no autorizado puede ser ilegal. Use con responsabilidad."
     LANG_MENU_TITLE=":: AETHERIS ▸ Reconocimiento. Ejecución Elegante ::"
     LANG_MENU_OPTIONS=(
-        "Reconocimiento completo (top 1000 puertos, detección de SO y servicios)" # Emojis REMOVED from definition
-        "Escaneo exhaustivo (todos los 65535 puertos, detección de SO y servicios)"    # Emojis REMOVED from definition
+        "Reconocimiento completo (top 1000 puertos, detección de SO y servicios)"
+        "Escaneo exhaustivo (todos los 65535 puertos, detección de SO y servicios)"
         "Descubrimiento de hosts en subred local"
         "Enumeración SMB"
         "Escaneo de vulnerabilidades HTTP (scripts básicos)"
@@ -203,10 +203,429 @@ load_spanish_lang() {
 
 # Check for root privileges
 check_root() {
-    if [[ $EUID -ne 0 ]]; then # Esta es la línea 206 que debes verificar
-        # Este mensaje es ahora localizado a través de LANG_MESSAGES['tool_not_installed'] y ['install_tool']
-        echo -e "${RED}[!] Este script requiere privilegios de root para algunos escaneos de Nmap.${NC}" # Este parte del mensaje podría seguir estando hardcoded o usar una clave específica si es necesario
-        echo -e "${YELLOW}Por favor, ejecute con 'sudo bash aetheris.sh' o 'sudo ./aetheris.sh'.${NC}" # Este parte del mensaje podría seguir estando hardcoded o usar una clave específica si es necesario
+    if [[ $EUID -ne 0 ]]; then
+        echo -e "${RED}[!] Este script requiere privilegios de root para algunos escaneos de Nmap.${NC}"
+        echo -e "${YELLOW}Por favor, ejecute con 'sudo bash aetheris.sh' o 'sudo ./aetheris.sh'.${NC}"
         exit 1
     fi
 }
+
+# Function to check for required tools
+check_tool() {
+    local tool=$1
+    if ! command -v "$tool" &> /dev/null; then
+        echo -e "${RED}${LANG_MESSAGES['tool_not_installed']}${NC}"
+        echo -e "${YELLOW}${LANG_MESSAGES['install_tool']}${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}${LANG_MESSAGES['tool_available']}${NC}"
+}
+
+# Function to clear screen and display banner
+display_banner() {
+    clear
+    local random_quote="${LANG_QUOTES[$((RANDOM % ${#LANG_QUOTES[@]}))]}"
+
+    echo -e "${BLUE}"
+    echo "  █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ ██╗ ██████╗"
+    echo " ██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗██║██╔════╝"
+    echo " ███████║█████╗     ██║   ███████║█████╗  ██████╔╝██║█████╗  "
+    echo " ██╔══██║██╔══╝     ██║   ██╔══██║██╔══╝  ██╔══██╗██║ ╔══╝██  "
+    echo " ██║  ██║███████╗   ██║   ██║  ██║███████╗██║  ██║██║██████ ╗"
+    echo " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚══════╝"
+    echo -e "${NC}"
+    echo -e "${CYAN} ${LANG_MENU_TITLE}${NC}"
+    echo -e "${MAGENTA}${random_quote}${NC}"
+    echo -e "${YELLOW}${LANG_WARNING['ethical']}${NC}"
+    echo
+}
+
+# Function to display the main menu
+display_menu() {
+    echo -e "${BLUE}:: Main Menu ::${NC}"
+    echo -e "${GREEN}$(icon "🧠") 1) ${LANG_MENU_OPTIONS[0]}${NC}"
+    echo -e "${GREEN}$(icon "🔭") 2) ${LANG_MENU_OPTIONS[1]}${NC}"
+    echo -e "${GREEN}$(icon "🌐") 3) ${LANG_MENU_OPTIONS[2]}${NC}"
+    echo -e "${GREEN}$(icon "🧭") 4) ${LANG_MENU_OPTIONS[3]}${NC}"
+    echo -e "${GREEN}$(icon "🛠️") 5) ${LANG_MENU_OPTIONS[4]}${NC}"
+    echo -e "${GREEN}$(icon "📂") 6) ${LANG_MENU_OPTIONS[5]}${NC}"
+    echo -e "${GREEN}$(icon "🔐") 7) ${LANG_MENU_OPTIONS[6]}${NC}"
+    echo -e "${GREEN}$(icon "⚙️") 8) ${LANG_MENU_OPTIONS[7]}${NC}"
+    echo -e "${GREEN}$(icon "📄") 9) ${LANG_MENU_OPTIONS[8]}${NC}"
+    echo -e "${RED}$(icon "❌") 10) ${LANG_MENU_OPTIONS[9]}${NC}"
+    echo
+    echo -n "$(icon "💡") ${YELLOW}${LANG_MESSAGES['invalid_option_menu']}: ${NC}"
+}
+
+# Function to get and validate target name
+get_target_name() {
+    read -rp "${YELLOW}${LANG_MESSAGES['prompt_target_name']} ${NC}" TARGET_NAME
+    while [[ -z "$TARGET_NAME" || "$TARGET_NAME" =~ " " ]]; do
+        echo -e "${RED}${LANG_MESSAGES['invalid_target_name']}${NC}"
+        read -rp "${YELLOW}${LANG_MESSAGES['prompt_target_name']} ${NC}" TARGET_NAME
+    done
+}
+
+# Function to get and validate IP address
+get_ip_target() {
+    local prompt_message="$1"
+    read -rp "${YELLOW}${LANG_MESSAGES['prompt_ip_target']} ${prompt_message}: ${NC}" TARGET_IP
+    while ! [[ "$TARGET_IP" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; do
+        echo -e "${RED}${LANG_MESSAGES['invalid_ip_format']}${NC}"
+        read -rp "${YELLOW}${LANG_MESSAGES['prompt_ip_target']} ${prompt_message}: ${NC}" TARGET_IP
+    done
+}
+
+# Function to get and validate subnet
+get_subnet_target() {
+    local prompt_message="$1"
+    read -rp "${YELLOW}${LANG_MESSAGES['prompt_subnet']} ${prompt_message}: ${NC}" TARGET_SUBNET
+    while ! [[ "$TARGET_SUBNET" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]; do
+        echo -e "${RED}${LANG_MESSAGES['invalid_subnet_format']}${NC}"
+        read -rp "${YELLOW}${LANG_MESSAGES['prompt_subnet']} ${prompt_message}: ${NC}" TARGET_SUBNET
+    done
+}
+
+# Function to get and validate ports
+get_ports() {
+    local prompt_message="$1"
+    local default_ports="$2"
+    read -rp "${YELLOW}${prompt_message} ${NC}" PORTS_INPUT
+    if [[ -z "$PORTS_INPUT" ]]; then
+        echo "Using default ports: $default_ports"
+        PORTS_INPUT="$default_ports"
+    else
+        while ! [[ "$PORTS_INPUT" =~ ^([0-9]+(-[0-9]+)?)(,[0-9]+(-[0-9]+)?)*$ ]]; do
+            echo -e "${RED}${LANG_MESSAGES['invalid_port_format']}${NC}"
+            read -rp "${YELLOW}${prompt_message} ${NC}" PORTS_INPUT
+            if [[ -z "$PORTS_INPUT" ]]; then # Allow blank for default if invalid input is given
+                echo "Using default ports: $default_ports"
+                PORTS_INPUT="$default_ports"
+                break
+            fi
+        done
+    fi
+    echo "$PORTS_INPUT" # Return the validated ports
+}
+
+
+# Function to create session directory
+create_session_dir() {
+    SCAN_SESSION_DIR="aetheris_scans/${TARGET_NAME}_$(date +%Y%m%d_%H%M%S)"
+    echo -e "${CYAN}${LANG_MESSAGES['reports_saved_to']} ${SCAN_SESSION_DIR}${NC}"
+    mkdir -p "$SCAN_SESSION_DIR"
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}${LANG_MESSAGES['failed_dir_creation']}${NC}"
+        exit 1
+    fi
+}
+
+# Function to run Nmap scan
+run_nmap_scan() {
+    local scan_name="$1"
+    local nmap_args="$2"
+    local target="$3"
+    local output_file_base="${SCAN_SESSION_DIR}/${TARGET_NAME}_${scan_name}"
+
+    echo -e "${BLUE}${LANG_MESSAGES['starting_nmap_scan']} ${target} (${scan_name})...${NC}"
+    echo -e "${CYAN}${LANG_MESSAGES['command_to_execute']} nmap ${nmap_args} ${target} -oA ${output_file_base}${NC}"
+
+    # Execute Nmap
+    sudo nmap ${nmap_args} ${target} -oA "${output_file_base}"
+    
+    if [[ $? -eq 0 ]]; then
+        echo -e "${GREEN}${LANG_MESSAGES['scan_completed_success']}${NC}"
+        generate_summary "${output_file_base}.xml"
+    else
+        echo -e "${RED}${LANG_MESSAGES['scan_failed']}${NC}"
+    fi
+    echo -e "${BLUE}Press Enter to continue...${NC}"
+    read -s
+}
+
+# Function to generate a quick summary from XML
+generate_summary() {
+    local xml_file="$1"
+    echo -e "\n${BLUE}${LANG_MESSAGES['quick_summary']}${NC}"
+
+    if [[ -f "$xml_file" ]]; then
+        local active_hosts=$(grep -c '<status state="up"' "$xml_file")
+        echo -e "${CYAN}${LANG_MESSAGES['hosts_active']} ${active_hosts}${NC}"
+
+        if [[ "$active_hosts" -gt 0 ]]; then
+            echo -e "${GREEN}--- Ports and Services ---${NC}"
+            # Extract hosts, ports, and services using awk and xmlstarlet
+            # Use 'xmlstarlet' for robust XML parsing. If not installed, fall back to grep/awk.
+            if command -v xmlstarlet &> /dev/null; then
+                xmlstarlet sel -t -m "//host" -v "address[@addrtype='ipv4']/@addr" -o " " -v "hostnames/hostname/@name" -n \
+                -m "ports/port" -v "portid" -o "/" -v "protocol" -o " " -v "state/@state" -o " " -v "service/@name" -o " " -v "service/@product" -o " " -v "service/@version" -n "$xml_file" | \
+                awk '
+                {
+                    ip = $1
+                    hostname = $2
+                    port = $3
+                    state = $4
+                    service = $5
+                    product = $6
+                    version = $7
+                    
+                    if (NR % 2 != 0) { # Process host line
+                        current_ip = ip
+                        current_hostname = hostname
+                    } else { # Process port line
+                        printf "  '"${CYAN}"'%s: %s'"${NC}"'\n", "'"${LANG_MESSAGES['host']}"'", current_ip
+                        if (current_hostname != "") {
+                            printf "  '"${CYAN}"'Hostname: %s'"${NC}"'\n", current_hostname
+                        }
+                        printf "    '"${MAGENTA}"'%s: %s/%s %s %s %s %s'"${NC}"'\n", "'"${LANG_MESSAGES['port']}"'", port, $4, $5, $6, $7, $8
+                    }
+                }'
+            else
+                echo -e "${YELLOW}Warning: xmlstarlet not found. Falling back to simpler grep/awk parsing. Consider installing xmlstarlet for more detailed summaries.${NC}"
+                grep -E '(<address addrtype="ipv4" addr="[^"]+"|service name="[^"]+"|portid="[^"]+"|state="[^"]+")' "$xml_file" | \
+                awk -F'[ ="]+' '
+                /address addrtype="ipv4"/ {
+                    ip = $5
+                    print "  '"${CYAN}"''"${LANG_MESSAGES['host']}"': " ip "'"${NC}"'"
+                }
+                /portid=/ {
+                    port = $2
+                    protocol = $4
+                    state = $6
+                    service = ""
+                    product = ""
+                    version = ""
+                    # Check for service details on the same line or subsequent lines
+                    for (i = 7; i <= NF; i++) {
+                        if ($i == "name") service = $(i+1)
+                        else if ($i == "product") product = $(i+1)
+                        else if ($i == "version") version = $(i+1)
+                    }
+                    printf "    '"${MAGENTA}"''"${LANG_MESSAGES['port']}"': %s/%s %s", port, protocol, state
+                    if (service != "") printf " %s", service
+                    if (product != "") printf " %s", product
+                    if (version != "") printf " (%s)", version
+                    print "'"${NC}"'"
+                }'
+            fi
+        fi
+    else
+        echo -e "${RED}${LANG_MESSAGES['xml_file_not_found']} ${xml_file}${NC}"
+    fi
+}
+
+
+# --- Scan Functions ---
+
+# Option 1: Full reconnaissance (top 1000 ports, OS & service detection)
+scan_full_reconnaissance() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for full reconnaissance"
+    run_nmap_scan "full_recon" "-sC -sV -O --top-ports 1000" "$TARGET_IP"
+}
+
+# Option 2: Exhaustive scan (all 65535 ports, OS & service detection)
+scan_exhaustive() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for exhaustive scan"
+    echo -e "${YELLOW}${LANG_MESSAGES['starting_exhaustive_scan']}${NC}"
+    run_nmap_scan "exhaustive" "-sC -sV -O -p-" "$TARGET_IP"
+}
+
+# Option 3: Local subnet host discovery
+scan_local_subnet_discovery() {
+    echo -e "${YELLOW}${LANG_MESSAGES['discovering_local_hosts']}${NC}"
+    get_subnet_target "${LANG_MESSAGES['prompt_local_subnet_discovery']}"
+    get_target_name # Get a name for the report
+    create_session_dir # Create session directory for the report
+    local output_file_base="${SCAN_SESSION_DIR}/${TARGET_NAME}_local_host_discovery"
+
+    echo -e "${BLUE}${LANG_MESSAGES['executing_nmap_discovery']}${NC}"
+    sudo nmap -sn "$TARGET_SUBNET" -oA "${output_file_base}"
+    
+    if [[ $? -eq 0 ]]; then
+        echo -e "${GREEN}${LANG_MESSAGES['host_discovery_complete']}${NC}"
+        echo -e "${CYAN}${LANG_MESSAGES['hosts_found']}${NC}"
+        # Parse XML to find active hosts
+        if [[ -f "${output_file_base}.xml" ]]; then
+            grep '<address addrtype="ipv4"' "${output_file_base}.xml" | awk -F'"' '{print "  - " $4}'
+        else
+            echo -e "${RED}${LANG_MESSAGES['xml_file_not_found']} ${output_file_base}.xml${NC}"
+        fi
+        echo -e "${YELLOW}${LANG_MESSAGES['use_these_ips']}${NC}"
+    else
+        echo -e "${RED}${LANG_MESSAGES['host_discovery_failed']}${NC}"
+    fi
+    echo -e "${BLUE}Press Enter to continue...${NC}"
+    read -s
+}
+
+# Option 4: SMB enumeration
+scan_smb_enumeration() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for SMB enumeration"
+    run_nmap_scan "smb_enum" "-p 445 --script smb-enum-shares,smb-enum-users,smb-os-discovery" "$TARGET_IP"
+}
+
+# Option 5: HTTP vulnerability scan (basic scripts)
+scan_http_vuln() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for HTTP vulnerability scan"
+    local default_http_ports="80,443,8000,8080"
+    local ports=$(get_ports "${LANG_MESSAGES['prompt_http_ports']}" "$default_http_ports")
+    run_nmap_scan "http_vuln" "-p ${ports} --script http-enum,http-headers,http-vuln-cve2017-1001000" "$TARGET_IP"
+}
+
+# Option 6: FTP vulnerability scan (basic scripts)
+scan_ftp_vuln() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for FTP vulnerability scan"
+    local default_ftp_ports="21"
+    local ports=$(get_ports "${LANG_MESSAGES['prompt_ftp_ports']}" "$default_ftp_ports")
+    run_nmap_scan "ftp_vuln" "-p ${ports} --script ftp-anon,ftp-bounce" "$TARGET_IP"
+}
+
+# Option 7: SSH enumeration (basic scripts)
+scan_ssh_enum() {
+    get_target_name
+    create_session_dir
+    get_ip_target "for SSH enumeration"
+    local default_ssh_ports="22"
+    local ports=$(get_ports "${LANG_MESSAGES['prompt_ssh_ports']}" "$default_ssh_ports")
+    run_nmap_scan "ssh_enum" "-p ${ports} --script ssh-hostkey,ssh-auth-methods" "$TARGET_IP"
+}
+
+# Option 8: Custom Nmap Scan (Advanced)
+scan_custom_nmap() {
+    get_target_name
+    create_session_dir
+    local custom_target
+    read -rp "${YELLOW}${LANG_MESSAGES['prompt_custom_target']} ${NC}" custom_target
+    while ! [[ "$custom_target" =~ ^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(/[0-9]{1,2})?)$ ]]; do
+        echo -e "${RED}${LANG_MESSAGES['invalid_target_format']}${NC}"
+        read -rp "${YELLOW}${LANG_MESSAGES['prompt_custom_target']} ${NC}" custom_target
+    done
+
+    local custom_args
+    read -rp "${YELLOW}${LANG_MESSAGES['prompt_custom_nmap_args']} ${NC}" custom_args
+    
+    run_nmap_scan "custom_scan" "${custom_args}" "$custom_target"
+}
+
+# Option 9: Generate HTML Report from XML
+generate_html_report() {
+    echo -e "${BLUE}${LANG_MESSAGES['generating_html_report']}${NC}"
+    local scan_dirs=(aetheris_scans/*/) # Get all session directories
+    
+    if [[ ${#scan_dirs[@]} -eq 0 || ! -d "${scan_dirs[0]}" ]]; then
+        echo -e "${YELLOW}${LANG_MESSAGES['no_xml_found']}${NC}"
+        echo -e "${YELLOW}${LANG_MESSAGES['run_scan_first']}${NC}"
+        echo -e "${BLUE}Press Enter to continue...${NC}"
+        read -s
+        return
+    fi
+
+    # Find all .xml files within aetheris_scans and its subdirectories
+    mapfile -t xml_files < <(find aetheris_scans -name "*.xml" | sort)
+
+    if [[ ${#xml_files[@]} -eq 0 ]]; then
+        echo -e "${YELLOW}${LANG_MESSAGES['no_xml_found']}${NC}"
+        echo -e "${YELLOW}${LANG_MESSAGES['run_scan_first']}${NC}"
+    else
+        echo -e "${CYAN}${LANG_MESSAGES['xml_files_found']}${NC}"
+        select xml_file_path in "${xml_files[@]}"; do
+            if [[ -n "$xml_file_path" ]]; then
+                output_html="${xml_file_path%.xml}.html"
+                echo -e "${GREEN}${LANG_MESSAGES['generating_html_for']}${NC}"
+                xsltproc "$xml_file_path" -o "$output_html"
+                if [[ $? -eq 0 ]]; then
+                    echo -e "${GREEN}${LANG_MESSAGES['html_generated_success']}${NC}"
+                    echo -e "${CYAN}${LANG_MESSAGES['open_in_browser']}${NC}"
+                else
+                    echo -e "${RED}${LANG_MESSAGES['html_generation_failed']}${NC}"
+                fi
+                break
+            else
+                echo -e "${RED}${LANG_MESSAGES['invalid_option_error']}${NC}"
+            fi
+        done
+    fi
+    echo -e "${BLUE}Press Enter to continue...${NC}"
+    read -s
+}
+
+# --- Main Logic ---
+main() {
+    clear # Clear screen at the very beginning
+    
+    # Determine language
+    local choice_lang
+    echo -e "${BLUE}Select Language / Selecciona Idioma:${NC}"
+    echo -e "${GREEN}1) English${NC}"
+    echo -e "${GREEN}2) Español${NC}"
+    read -rp "$(icon "💡") Choose language (1/2): " choice_lang
+    case "$choice_lang" in
+        1) load_english_lang ;;
+        2) load_spanish_lang ;;
+        *)
+            echo -e "${YELLOW}Invalid choice. Defaulting to English.${NC}"
+            load_english_lang
+            ;;
+    esac
+
+    # Initial check for icon support and Nerd Font prompt
+    if [ "$USE_ICONS" = false ]; then
+        echo -e "${YELLOW}${LANG_ICON_PROMPTS['unicode_warning']}${NC}"
+        read -rp "${YELLOW}${LANG_ICON_PROMPTS['install_nerdfont_prompt']} ${NC}" install_nerdfont_choice
+        if [[ "$install_nerdfont_choice" =~ ^[Yy]$ ]]; then
+            echo -e "${CYAN}${LANG_ICON_PROMPTS['download_nerdfont_link']} ${BLUE}https://www.nerdfonts.com/font-downloads${NC}"
+            echo -e "${YELLOW}${LANG_ICON_PROMPTS['restart_terminal_tip']}${NC}"
+        fi
+    fi
+    echo
+
+    # Debug: Confirm script started
+    echo -e "🧪 Debug: AETHERIS started"
+
+    check_root
+    check_tool "nmap"
+    check_tool "xsltproc" # For HTML report generation
+
+    while true; do
+        display_banner
+        display_menu
+        read -rp "$(icon "💡") ${LANG_MESSAGES['invalid_option_menu']}: " choice
+        echo
+
+        case $choice in
+            1) scan_full_reconnaissance ;;
+            2) scan_exhaustive ;;
+            3) scan_local_subnet_discovery ;;
+            4) scan_smb_enumeration ;;
+            5) scan_http_vuln ;;
+            6) scan_ftp_vuln ;;
+            7) scan_ssh_enum ;;
+            8) scan_custom_nmap ;;
+            9) generate_html_report ;;
+            10) # Exit
+                echo -e "${YELLOW}${LANG_MESSAGES['exiting_reports_saved']}${NC}"
+                echo -e "${CYAN}${LANG_MESSAGES['exiting_message']}${NC}"
+                echo -e "${BLUE}${LANG_FOOTER}${NC}"
+                break
+                ;;
+            *)\
+                echo -e "${RED}${LANG_MESSAGES['invalid_option_error']}${NC}"
+                echo -e "${BLUE}Press Enter to continue...${NC}"
+                read -s
+                ;;
+        esac
+    done
+}
+
+# Run the main function
+main
