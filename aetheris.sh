@@ -107,7 +107,7 @@ load_spanish_lang() {
         "🧭 Enumeración SMB"
         "🛠️ Escaneo de vulnerabilidades HTTP (scripts básicos)"
         "📂 Escaneo de vulnerabilidades FTP (scripts básicos)"
-        "🔐 Enumeración SSH (scripts básicos)"
+        "Enumeración SSH (scripts básicos)"
         "⚙️ Escaneo Nmap Personalizado (Avanzado)"
         "📄 Generar Informe HTML desde XML"
         "❌ Salir"
