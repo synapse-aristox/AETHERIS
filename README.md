@@ -54,8 +54,8 @@ sudo apt install nmap xsltproc
 ## 🛠 Installation
 
 ```bash
-git clone https://github.com/NyxKraken/aetheris.git
-cd aetheris
+git clone https://github.com/synapse-aristox/AETHERIS.git
+cd AETHERIS
 chmod +x aetheris.sh
 ```
 
