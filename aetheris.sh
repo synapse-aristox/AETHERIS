@@ -203,6 +203,10 @@ load_spanish_lang() {
 
 # Check for root privileges
 check_root() {
-    if [[ <span class="math-inline">EUID \-ne 0 \]\]; then
-\# This message is now localized via LANG\_MESSAGES\['tool\_not\_installed'\] and \['install\_tool'\]
-echo \-e "</span>{RED}[!] ${LANG_MESSAGES['tool_not_installed']/.*/Este script requiere privilegios de root para algunos escaneos de N
+    if [[ $EUID -ne 0 ]]; then # Esta es la línea 206 que debes verificar
+        # Este mensaje es ahora localizado a través de LANG_MESSAGES['tool_not_installed'] y ['install_tool']
+        echo -e "${RED}[!] Este script requiere privilegios de root para algunos escaneos de Nmap.${NC}" # Este parte del mensaje podría seguir estando hardcoded o usar una clave específica si es necesario
+        echo -e "${YELLOW}Por favor, ejecute con 'sudo bash aetheris.sh' o 'sudo ./aetheris.sh'.${NC}" # Este parte del mensaje podría seguir estando hardcoded o usar una clave específica si es necesario
+        exit 1
+    fi
+}
