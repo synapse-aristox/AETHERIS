@@ -70,9 +70,9 @@ def run_analysis(xml_path, cve_path="cves_actuales.txt", output_dir=None):
 # Bloque para ejecución directa del script
 if __name__ == "__main__":
     # Esto simula cómo se llamaría desde aetheris_main.py o directamente
-    # Para probar, necesitas un archivo XML de Nmap y el cves_actuales.txt
+    # Para probar, se necesita un archivo XML de Nmap y el cves_actuales.txt
     
-    # Ejemplo de uso (AJUSTA LAS RUTAS SEGÚN TU ESTRUCTURA LOCAL)
+    # Ejemplo de uso (AJUSTA LAS RUTAS SEGÚN ESTRUCTURA LOCAL)
     # Por ejemplo, si tienes un escaneo Nmap en:
     # aetheris/resultados/192.168.1.1_20240602_150000/nmap_scan_192.168.1.1.xml
     # Y tu cves_actuales.txt está en: aetheris/cves_actuales.txt
