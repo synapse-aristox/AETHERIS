@@ -4,7 +4,7 @@ import requests
 import datetime
 import configparser # Importar configparser aquí también
 
-# Puedes definir una función principal que tome la configuración
+# Se puede definir una función principal que tome la configuración
 def update_cve_database(config):
     """
     Función para actualizar la base de datos de CVEs.
@@ -27,8 +27,8 @@ def update_cve_database(config):
     console_temp.print(f"\n[bold yellow]📡 Iniciando actualización de CVEs desde Vulners...[/bold yellow]")
     console_temp.print(f"Filtros: CVSS >= {min_cvss_score}, Año >= {min_year}, Exploit: {enable_exploit_filter}, Incremental: {enable_incremental}")
 
-    # Aquí iría tu lógica de actualización de CVEs que ya tienes
-    # Asegúrate de que esta lógica use los parámetros de 'config'
+    # Aquí iría la lógica de actualización de CVEs
+    # Asegúrarse de que esta lógica use los parámetros de 'config'
     # Ejemplo:
     # Consulta la API de Vulners, filtra por los parámetros, etc.
     # Por ahora, un placeholder:
@@ -36,7 +36,7 @@ def update_cve_database(config):
 
     # Simulación de descarga y procesamiento (reemplazar con tu lógica real)
     try:
-        # Ejemplo de cómo podrías cargar el contenido de cves_actuales.txt para incremental
+        # Ejemplo de cómo se podría cargar el contenido de cves_actuales.txt para incremental
         last_update_date = None
         if enable_incremental and os.path.exists(cve_file_path):
             with open(cve_file_path, 'r', encoding='utf-8') as f:
