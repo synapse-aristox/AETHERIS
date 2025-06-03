@@ -68,7 +68,7 @@ def get_aetheris_config(config_file_path='config/aetheris.conf'):
     """
     config = configparser.ConfigParser()
     try:
-        # Asegúrate de que la ruta sea relativa a la raíz del proyecto
+        # Asegurarse de que la ruta sea relativa a la raíz del proyecto
         # Si report_generator.py está en lib/, entonces 'config/' es '../config/'
         absolute_config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), config_file_path)
         
@@ -194,7 +194,7 @@ def _generate_txt_report(vulnerabilities_found, report_file_path, target_info, f
 def _generate_html_report(vulnerabilities_found, report_file_path, target_info, findings_by_ip, _):
     """Genera el informe en formato HTML usando una plantilla Jinja2."""
     try:
-        # Configura Jinja2 para cargar plantillas desde la carpeta 'templates'
+        # Configurar Jinja2 para cargar plantillas desde la carpeta 'templates'
         # La ruta debe ser relativa desde donde se ejecuta aetheris_main.py (raíz del proyecto)
         # o desde lib/report_generator.py (retroceder un nivel)
         template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
@@ -227,7 +227,7 @@ def _generate_html_report(vulnerabilities_found, report_file_path, target_info, 
 
 # --- Bloque para pruebas rápidas (opcional) ---
 if __name__ == "__main__":
-    # Necesitas instalar Jinja2 para la parte HTML: pip install Jinja2
+    # Se necesita instalar Jinja2 para la parte HTML: pip install Jinja2
     
     # 1. Crear un aetheris.conf de ejemplo para la prueba en la carpeta 'config/'
     #    (La ruta de config_file_path en get_aetheris_config() asume que aetheris.conf está en ../config/aetheris.conf)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         }
     ]
 
-    # Define una ruta de salida temporal para la prueba (simulando resultados/IP_TIMESTAMP/)
+    # Definir una ruta de salida temporal para la prueba (simulando resultados/IP_TIMESTAMP/)
     test_output_base_dir = "temp_report_test/192.168.1.X_TEST_SCAN"
     os.makedirs(test_output_base_dir, exist_ok=True)
     test_report_base_path = os.path.join(test_output_base_dir, "vuln_report") # Sin extensión
