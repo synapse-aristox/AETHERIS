@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="{{ translations.get('lang_code', 'es') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        :root {
+            --bg-light: #f4f4f4;
+            --bg-dark: #121212;
+            --text-light: #333;
+            --text-dark: #f5f5f5;
+            --card-light: #fff;
+            --card-dark: #1e1e1e;
+            --primary: #0056b3;
+            --accent: #dc3545;
+            --border-light: #ddd;
+            --border-dark: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: var(--card-light);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 { color: var(--primary); }
+        h1 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .header-info {
+            background-color: #e9ecef;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .header-info p {
+            margin: 5px 0;
+        }
+
+        .host-section {
+            border: 1px solid var(--border-light);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 25px;
+            background-color: #fcfcfc;
+        }
+
+        .host-section h3 {
+            margin-top: 0;
+        }
+
+        .vulnerability-item {
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .vulnerability-item strong { color: var(--accent); }
+        .vulnerability-item p, .vulnerability-item ul { margin: 5px 0; }
+        .vulnerability-item ul { list-style: none; padding: 0; }
+        .vulnerability-item ul li { margin-bottom: 3px; }
+        .vulnerability-item ul li strong { color: #555; }
+
+        .no-vulnerabilities {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 50px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--bg-dark);
+                color: var(--text-dark);
+            }
+
+            .container {
+                background: var(--card-dark);
+                box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            }
+
+            h1, h2 { color: #66b2ff; }
+
+            .header-info {
+                background-color: #1f1f1f;
+                color: var(--text-dark);
+            }
+
+            .host-section {
+                background-color: #181818;
+                border-color: var(--border-dark);
+            }
+
+            .vulnerability-item ul li strong {
+                color: #ccc;
+            }
+
+            .footer {
+                border-top: 1px solid #444;
+                color: #aaa;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ title }}</h1>
+        <div class="header-info">
+            <p><strong>{{ translations.generated_on }}:</strong> {{ generated_on }}</p>
+            <p><strong>{{ translations.scan_target }}:</strong> {{ scan_target }}</p>
+            <p><strong>{{ translations.total_vulnerabilities }}:</strong> {{ total_vulnerabilities }}</p>
+        </div>
+
+        {% if total_vulnerabilities == 0 %}
+            <p class="no-vulnerabilities">{{ no_vulnerabilities_message }}</p>
+        {% else %}
+            {% for ip, findings in findings_by_ip.items() %}
+                <div class="host-section">
+                    <h2>{{ translations.host }}: {{ ip }}</h2>
+                    {% for finding in findings %}
+                        <div class="vulnerability-item">
+                            <h3>{{ translations.service_detected }}: {{ finding.product }} {{ finding.version }} ({{ finding.service_name }}) en {{ finding.port }}/{{ finding.protocol }}</h3>
+                            <p><strong>{{ translations.cve_identified }}:</strong>
+                                {% if finding.cve_mitre_url %}
+                                    <a href="{{ finding.cve_mitre_url }}" target="_blank">{{ finding.cve_id }}</a>
+                                {% else %}
+                                    {{ finding.cve_id }}
+                                {% endif %}
+                            </p>
+                            <ul>
+                                <li><strong>{{ translations.cwe_id }}:</strong> {{ finding.cwe_id }}</li>
+                                <li><strong>{{ translations.description }}:</strong> {{ finding.cve_desc }}</li>
+                                <li><strong>{{ translations.published }}:</strong> {{ finding.cve_pub }}</li>
+                                <li><strong>{{ translations.cvss_score }}:</strong> {{ finding.cve_cvss }}</li>
+                                <li><strong>{{ translations.exploit_available }}:</strong> {{ translations.yes if finding.cve_exploit else translations.no }}</li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="footer">
+            <p>{{ powered_by }}</p>
+        </div>
+    </div>
+</body>
+</html>

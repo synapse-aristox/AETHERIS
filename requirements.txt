@@ -1,0 +1,14 @@
+# Interfaz visual (menús, paneles, tablas, consola bonita)
+rich>=14.0.0
+
+# Normalización de texto (acentos, ñ, etc.)
+unidecode>=1.3.6
+
+# Traducción automática (usado en update_cves)
+deep-translator>=1.11.4
+
+# Manejo avanzado de fechas (compatible con datetime, necesario para algunos formatos)
+python-dateutil>=2.9.0
+
+# Parsing de HTML (opcional, útil para futuras integraciones o análisis de CVE HTML)
+beautifulsoup4>=4.13.0
