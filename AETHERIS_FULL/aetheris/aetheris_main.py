@@ -1,4 +1,4 @@
-# aetheris_main.py (Este archivo está en la raíz de tu proyecto AETHERIS_FULL)
+# aetheris_main.py 
 
 import os
 import sys
@@ -13,7 +13,7 @@ from rich.box import MINIMAL_HEAVY
 
 # --- INICIO: SOLUCIÓN PARA ERRORES DE IMPORTACIÓN ---
 # Esta línea fuerza a Python a reconocer el directorio donde se encuentra este script
-# (que es la raíz de tu proyecto 'AETHERIS_FULL') como una ubicación para buscar módulos.
+# (que es la raíz del proyecto 'AETHERIS_FULL') como una ubicación para buscar módulos.
 # Esto ayuda a VS Code (Pylance) a resolver las importaciones correctamente
 # y asegura que el script funcione bien sin importar desde dónde se ejecute.
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -27,7 +27,7 @@ from .lib.utils import (
     setup_logging, get_timestamp, ensure_directory,
     validate_ip, validate_subnet, extract_target_ip_from_path,
     aetheris_logger as logger, # Importa la instancia del logger ya configurada
-    slugify, # Asegúrate de que slugify también esté en utils.py y lo importas aquí
+    slugify, # Asegúrarse de que slugify también esté en utils.py y lo importas aquí
     is_public_ip # <-- ¡IMPORTACIÓN DE LA NUEVA FUNCIÓN!
 )
 
@@ -39,19 +39,19 @@ from .lib import report_generator
 
 # Estos módulos están directamente en la carpeta raíz 'AETHERIS_FULL'
 from .analizar_vs_scan import mostrar_coincidencias
-from .update_cves import actualizar_cves # <-- Asegúrate que tu archivo se llama 'update_cves.py'
+from .update_cves import actualizar_cves # <-- Asegúra que el archivo se llama 'update_cves.py'
 
 
 # --- Configuración de Rich Console ---
 console = Console()
 
 # --- Rutas Globales ---
-# BASE_DIR ahora apunta a la raíz del proyecto (AETHERIS_FULL)
+# BASE_DIR apunta a la raíz del proyecto (AETHERIS_FULL)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Las rutas se construyen a partir de BASE_DIR
 CONFIG_DIR = os.path.join(BASE_DIR, "config")
-RESULTS_DIR = os.path.join(BASE_DIR, "results") # Ajustado a 'results' según tu estructura
+RESULTS_DIR = os.path.join(BASE_DIR, "results") # Ajustado a 'results' según  estructura
 CVE_DATA_DIR = os.path.join(BASE_DIR, "cve_data") # 'cve_data' es la carpeta padre
 CVE_DATABASE_PATH = os.path.join(CVE_DATA_DIR, "cves_actuales.txt") # Ruta completa
 CONFIG_FILE_PATH = os.path.join(CONFIG_DIR, "aetheris.conf")
@@ -409,7 +409,7 @@ def main():
     log_level = config.get('GLOBAL', 'log_level', fallback='INFO')
     log_file_path_from_config = config.get('GLOBAL', 'log_file_path', fallback='logs/aetheris.log')
 
-    # Asegúrate de que la ruta del log sea absoluta, basada en BASE_DIR
+    # Asegúrarse de que la ruta del log sea absoluta, basada en BASE_DIR
     log_file_path = os.path.join(BASE_DIR, log_file_path_from_config)
 
     # Esta llamada configura el logger importado 'logger'
