@@ -90,7 +90,7 @@ def match_services_with_cves(scanned_services, cves_db):
                    (service_name and service_name in cve_desc):
                     found_match = True
 
-            # Puedes añadir más lógicas aquí, como:
+            # Se puede añadir más lógicas aquí, como:
             # - Matching parcial de versiones (ej. "2.4" para "2.4.52")
             # - Exclusiones (ej. si la CVE menciona "Windows" y el servicio es de Linux)
 
@@ -108,15 +108,15 @@ def match_services_with_cves(scanned_services, cves_db):
                     'cve_exploit': cve.get('exploit')
                 }
                 vulnerable_findings.append(finding)
-                # Opcional: break aquí si solo quieres la primera CVE encontrada por servicio
+                # Opcional: break aquí si solo se quiere la primera CVE encontrada por servicio
                 # break # Esto detiene la búsqueda de CVEs para el servicio actual una vez que se encuentra una coincidencia.
-                        # Si quieres encontrar TODAS las CVEs para UN servicio, NO uses break.
+                        # Si se quiere encontrar TODAS las CVEs para UN servicio, NO usar break.
 
     return vulnerable_findings
 
 # --- Bloque para pruebas rápidas (opcional) ---
 if __name__ == "__main__":
-    # Necesitas un archivo cves_actuales.txt y datos de servicios parseados
+    # Se necesita un archivo cves_actuales.txt y datos de servicios parseados
     # para probar este módulo de forma independiente.
 
     # 1. Crear un archivo cves_actuales.txt de ejemplo para la prueba
